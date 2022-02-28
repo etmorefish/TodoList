@@ -30,4 +30,5 @@ func Database(connstring string) {
 
 	DB = db // 复制给全局db
 
+	migration()
 }
