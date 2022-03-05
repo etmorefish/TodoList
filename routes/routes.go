@@ -23,7 +23,7 @@ func NewRouter() *gin.Engine {
 		authed := v1.Group("/")
 		authed.Use(middleware.JWT())
 		{
-
+			authed.POST("task", api.CreateTask)
 		}
 	}
 

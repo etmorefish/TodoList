@@ -9,8 +9,8 @@ import (
 
 func JWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var code int
-		var data interface{}
+		code := 200
+		// var data interface{}
 		token := c.GetHeader("Authorization")
 		if token == "" {
 			code = 404
