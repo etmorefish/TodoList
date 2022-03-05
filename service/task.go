@@ -12,6 +12,9 @@ type CreateTaskService struct {
 	Status  int    `json:"status" form:"status"` // 0未作；1已做
 }
 
+type ShowTaskService struct {
+}
+
 func (service *CreateTaskService) Create(id uint) serializer.Response {
 	var user model.User
 	model.DB.First(&user, id)
@@ -36,4 +39,22 @@ func (service *CreateTaskService) Create(id uint) serializer.Response {
 		Status: 200,
 		Msg:    "创建成功",
 	}
+}
+
+func (service *ShowTaskService) Show(tid string) serializer.Response {
+	var task model.Task
+	code := 200
+	err := model.DB.First(&task, tid).Error
+	if err != nil {
+		code = 500
+		return serializer.Response{
+			Status: code,
+			Msg:    "查询失败",
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildTask(task),
+	}
+
 }
