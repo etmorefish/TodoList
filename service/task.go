@@ -26,6 +26,13 @@ type UpdateTaskService struct {
 	Status  int    `json:"status" form:"status"` // 0未作；1已做
 }
 
+type SearchTaskService struct {
+	Info     string `json:"info" form:"info"`
+	PageNum  int    `json:"page_num" form:"page_num"`
+	PageSize int    `json:"page_size" form:"page_size"`
+}
+
+//创建一条记录
 func (service *CreateTaskService) Create(id uint) serializer.Response {
 	var user model.User
 	model.DB.First(&user, id)
@@ -52,6 +59,7 @@ func (service *CreateTaskService) Create(id uint) serializer.Response {
 	}
 }
 
+//展示一条记录
 func (service *ShowTaskService) Show(tid string) serializer.Response {
 	var task model.Task
 	code := 200
@@ -83,6 +91,7 @@ func (service *ListTaskService) List(uid uint) serializer.Response {
 	return serializer.BuildListResponse(serializer.BuildTasks(tasks), uint(count))
 }
 
+//更新
 func (service *UpdateTaskService) Update(tid string) serializer.Response {
 	var task model.Task
 	code := 200
@@ -104,4 +113,21 @@ func (service *UpdateTaskService) Update(tid string) serializer.Response {
 		Data:   serializer.BuildTask(task),
 		Msg:    "更新完成",
 	}
+}
+
+func (service *SearchTaskService) Search(uid uint) serializer.Response {
+	var tasks []model.Task
+	count := 0
+	if service.PageSize == 0 {
+		service.PageSize = 10
+	}
+	model.DB.Model(&model.Task{}).Preload("User").
+		Where("uid=?", uid).
+		Where("title LIKE ? OR content LIKE ?", "%"+service.Info+"%", "%"+service.Info+"%").
+		Count(&count).
+		Limit(service.PageSize).
+		Offset((service.PageNum - 1) * service.PageSize).
+		Find(&tasks)
+
+	return serializer.BuildListResponse(serializer.BuildTasks(tasks), uint(count))
 }

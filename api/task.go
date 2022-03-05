@@ -44,12 +44,23 @@ func ListTask(c *gin.Context) {
 	}
 }
 
-
 func UpdateTask(c *gin.Context) {
 	var updateTask service.UpdateTaskService
 	// claims, _ := util.ParseToken(c.GetHeader("Authorization"))
 	if err := c.ShouldBind(&updateTask); err == nil {
 		res := updateTask.Update(c.Param("id"))
+		c.JSON(200, res)
+	} else {
+		logging.Error(err)
+		c.JSON(400, ErrorResponse(err))
+	}
+}
+
+func SearchTask(c *gin.Context) {
+	var searchTask service.SearchTaskService
+	claims, _ := util.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&searchTask); err == nil {
+		res := searchTask.Search(claims.Id)
 		c.JSON(200, res)
 	} else {
 		logging.Error(err)
