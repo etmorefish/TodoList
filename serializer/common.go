@@ -10,7 +10,7 @@ type Response struct {
 
 //DataList 带有总数的Data结构
 type DataList struct {
-	Item  interface{} `json:"item"`
+	Item  interface{} `json:"items"`
 	Total uint        `json:"total"`
 }
 
