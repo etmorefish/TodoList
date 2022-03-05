@@ -20,6 +20,12 @@ type ListTaskService struct {
 	PageSize int `json:"page_size" form:"page_size"`
 }
 
+type UpdateTaskService struct {
+	Title   string `json:"title" form:"title"`
+	Content string `json:"content" form:"content"`
+	Status  int    `json:"status" form:"status"` // 0未作；1已做
+}
+
 func (service *CreateTaskService) Create(id uint) serializer.Response {
 	var user model.User
 	model.DB.First(&user, id)
@@ -61,7 +67,6 @@ func (service *ShowTaskService) Show(tid string) serializer.Response {
 		Status: code,
 		Data:   serializer.BuildTask(task),
 	}
-
 }
 
 // 列表返回用户所有备忘录
@@ -76,4 +81,27 @@ func (service *ListTaskService) List(uid uint) serializer.Response {
 		Limit(service.PageSize).Offset((service.PageNum - 1) * service.PageSize).Find(&tasks)
 
 	return serializer.BuildListResponse(serializer.BuildTasks(tasks), uint(count))
+}
+
+func (service *UpdateTaskService) Update(tid string) serializer.Response {
+	var task model.Task
+	code := 200
+	err := model.DB.First(&task, tid).Error
+	if err != nil {
+		code = 500
+		return serializer.Response{
+			Status: code,
+			Msg:    "查询失败",
+		}
+	}
+	task.Content = service.Content
+	task.Title = service.Title
+	task.Status = service.Status
+	model.DB.Save(&task)
+
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildTask(task),
+		Msg:    "更新完成",
+	}
 }
