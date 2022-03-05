@@ -32,6 +32,9 @@ type SearchTaskService struct {
 	PageSize int    `json:"page_size" form:"page_size"`
 }
 
+type DeleteTaskService struct {
+}
+
 //创建一条记录
 func (service *CreateTaskService) Create(id uint) serializer.Response {
 	var user model.User
@@ -115,6 +118,7 @@ func (service *UpdateTaskService) Update(tid string) serializer.Response {
 	}
 }
 
+// 模糊查询
 func (service *SearchTaskService) Search(uid uint) serializer.Response {
 	var tasks []model.Task
 	count := 0
@@ -130,4 +134,20 @@ func (service *SearchTaskService) Search(uid uint) serializer.Response {
 		Find(&tasks)
 
 	return serializer.BuildListResponse(serializer.BuildTasks(tasks), uint(count))
+}
+
+//删除一条记录
+func (service *DeleteTaskService) Delete(tid string) serializer.Response {
+	var task model.Task
+	err := model.DB.Delete(&task, tid).Error
+	if err != nil {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "删除失败",
+		}
+	}
+	return serializer.Response{
+		Status: 200,
+		Msg:    "删除成功",
+	}
 }
